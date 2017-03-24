@@ -418,6 +418,26 @@ FS.HTTP.Handlers.Get = function httpGetHandler(ref) {                           
                                                                                                                       // 218
   readStream.pipe(self.createWriteStream());                                                                          // 219
 };                                                                                                                    // 220
+
+const originalHandler = FS.HTTP.Handlers.Get;
+FS.HTTP.Handlers.Get = function (ref) {
+//console.log(ref.filename);
+  try {
+     var userAgent = (this.requestHeaders['user-agent']||'').toLowerCase();
+
+        if(userAgent.indexOf('msie') >= 0 || userAgent.indexOf('chrome') >= 0) {
+            ref.filename =  encodeURIComponent(ref.filename);
+        } else if(userAgent.indexOf('firefox') >= 0) {
+            ref.filename = new Buffer(ref.filename).toString('binary');
+        } else {
+            /* safari*/
+            ref.filename = new Buffer(ref.filename).toString('binary');
+        }
+   } catch (ex){
+        ref.filename = 'tempfix';
+   } 
+   return originalHandler.call(this, ref);
+};
                                                                                                                       // 221
 /**                                                                                                                   // 222
  * @method FS.HTTP.Handlers.PutInsert                                                                                 // 223
